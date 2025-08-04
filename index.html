@@ -25,26 +25,6 @@
       padding-left: 1.5rem;
       text-align: left;
     }
-    /* Sticky header for table */
-    thead th {
-      position: sticky;
-      top: 0;
-      background-color: #0d6efd;
-      color: white;
-      z-index: 10;
-    }
-    /* Scrollable tbody */
-    tbody {
-      display: block;
-      max-height: 550px;
-      overflow-y: auto;
-    }
-    thead, tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-    /* GitHub star button */
     .github-star-btn {
       position: fixed;
       bottom: 20px;
@@ -64,6 +44,10 @@
       background-color: #0366d6;
       color: #fff;
     }
+    input[type="number"] {
+      width: 100%;
+      min-width: 80px;
+    }
   </style>
 </head>
 <body>
@@ -82,18 +66,20 @@
     <button id="exportExcel" class="btn btn-primary">Download as Excel</button>
   </div>
 
-  <table class="table table-bordered table-hover align-middle">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th style="width:120px;">Cost ($)</th>
-        <th style="width:120px;">Profit (%)</th>
-        <th style="width:130px;">Sale Price ($)</th>
-        <th style="width:130px;">Profit ($)</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Product</th>
+          <th>Cost ($)</th>
+          <th>Profit (%)</th>
+          <th>Sale Price ($)</th>
+          <th>Profit ($)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
 </div>
 
@@ -101,8 +87,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
 <script>
-  // Product data (empty now, add your products here)
-   const productGroups = {
+    const productGroups = {
   "Basic Products I": ["Pasta Penne", "Water Bottle", "Honey Cereals", "Rice", "Salt", "Sugar"],
   "Basic Products II": ["Margarine", "Flour", "Apple Juice", "Olive Oil", "Ketchup", "Sliced Bread", "Pepper"],
   "Basic Products III": ["Orange Juice", "Barbaque Sauce", "Mustard Sauce", "Spaghetti Box", "Tuna Pate", "Fiber Cereals", "Supreme Flour"],
@@ -190,11 +175,10 @@
     }
   }
 
-  // Search filter
   document.getElementById('searchInput').addEventListener('input', function() {
     const filter = this.value.toLowerCase();
     const rows = document.querySelectorAll('#tableBody tr');
-    
+
     let currentCategoryRow = null;
     let categoryHasVisible = false;
 
@@ -205,7 +189,7 @@
         }
         currentCategoryRow = row;
         categoryHasVisible = false;
-        row.style.display = ''; 
+        row.style.display = '';
       } else {
         const productName = row.querySelector('.product-name').textContent.toLowerCase();
         if (productName.includes(filter)) {
@@ -222,8 +206,7 @@
     }
   });
 
-  // Excel export
-  document.getElementById('exportExcel').addEventListener('click', function() {
+  document.getElementById('exportExcel').addEventListener('click', function () {
     const wb = XLSX.utils.book_new();
     const ws_data = [];
 
@@ -232,9 +215,9 @@
     const rows = document.querySelectorAll('#tableBody tr');
 
     rows.forEach(row => {
-      if (row.style.display === 'none') return; 
+      if (row.style.display === 'none') return;
       if (row.classList.contains('category-row')) {
-        ws_data.push([row.cells[0].innerText]); 
+        ws_data.push([row.cells[0].innerText]);
         return;
       }
 
@@ -253,16 +236,12 @@
 
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     XLSX.utils.book_append_sheet(wb, ws, "Products");
-
     XLSX.writeFile(wb, "SupermarketTogether_ProfitCalculator.xlsx");
   });
 
   createTable();
-
 </script>
 
-<!-- Bootstrap 5 JS Bundle (Popper + Bootstrap JS) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
