@@ -72,9 +72,31 @@
       text-align: left;
       padding-left: 20px;
     }
+      .github-star-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #24292e;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    text-decoration: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    transition: background-color 0.3s ease;
+    z-index: 9999;
+  }
+  .github-star-btn:hover {
+    background-color: #0366d6;
+    color: #fff;
+  }
   </style>
 </head>
 <body>
+  <a href="https://github.com/Barracuda1337/supermarket-profit-calc" target="_blank" rel="noopener" class="github-star-btn" title="Star us on GitHub!">
+  ⭐ Star on GitHub
+</a>
   <div class="container">
     <h2>Supermarket Together Profit Calculator</h2>
 <p>Products are grouped by category. Enter cost and profit rate to calculate automatically.</p>
@@ -182,4 +204,5 @@
   </script>
 </body>
 </html>
+
 
