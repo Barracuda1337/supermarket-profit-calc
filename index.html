@@ -10,20 +10,17 @@
   <meta name="keywords" content="Supermarket Together, profit calculator, price calculator, supermarket game, product pricing, category pricing, online calculator" />
   <meta name="author" content="barracuda1337" />
 
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Supermarket Together Profit Calculator" />
   <meta property="og:description" content="Calculate profit and sale prices easily for Supermarket Together game products. Grouped by category with automatic calculation." />
   <meta property="og:url" content="https://github.com/Barracuda1337/supermarket-profit-calc" />
 
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Supermarket Together Profit Calculator" />
   <meta name="twitter:description" content="Calculate profit and sale prices easily for Supermarket Together game products. Grouped by category with automatic calculation." />
 
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-  <!-- CSS dosyan varsa buraya link ekle -->
-  <!-- <link rel="stylesheet" href="style.css" /> -->
   <style>
     body { font-family: Arial; padding: 30px; background: #f4f4f4; }
     .container {
@@ -100,6 +97,10 @@
   <div class="container">
     <h2>Supermarket Together Profit Calculator</h2>
 <p>Products are grouped by category. Enter cost and profit rate to calculate automatically.</p>
+
+    <input type="text" id="searchInput" placeholder="Search products..." style="width: 300px; padding:5px; font-size:14px; margin-bottom:10px;">
+    <button id="exportExcel" style="margin-bottom: 15px;">Download as Excel</button>
+
     <table>
      <thead>
   <tr>
@@ -113,7 +114,73 @@
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+<script>
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr');
+    
+    let currentCategoryRow = null;
+    let categoryHasVisible = false;
 
+    rows.forEach(row => {
+      if (row.classList.contains('category-row')) {
+        if (currentCategoryRow && !categoryHasVisible) {
+          currentCategoryRow.style.display = 'none';
+        }
+        currentCategoryRow = row;
+        categoryHasVisible = false;
+        row.style.display = ''; 
+      } else {
+        const productName = row.querySelector('.product-name').textContent.toLowerCase();
+        if (productName.includes(filter)) {
+          row.style.display = '';
+          categoryHasVisible = true;
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+
+    if (currentCategoryRow && !categoryHasVisible) {
+      currentCategoryRow.style.display = 'none';
+    }
+  });
+
+  
+  document.getElementById('exportExcel').addEventListener('click', function() {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+
+  ws_data.push(["Product", "Cost ($)", "Profit (%)", "Sale Price ($)", "Profit ($)"]);
+
+  const rows = document.querySelectorAll('#tableBody tr');
+
+  rows.forEach(row => {
+    if (row.style.display === 'none') return; 
+    if (row.classList.contains('category-row')) {
+      ws_data.push([row.cells[0].innerText]); 
+      return;
+    }
+
+    const cells = row.querySelectorAll('td');
+    const rowData = [];
+    cells.forEach(cell => {
+      const input = cell.querySelector('input');
+      if (input) {
+        rowData.push(input.value || '');
+      } else {
+        rowData.push(cell.innerText);
+      }
+    });
+    ws_data.push(rowData);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, "Products");
+
+  XLSX.writeFile(wb, "SupermarketTogether_ProfitCalculator.xlsx");
+});
+</script>
   <script>
    const productGroups = {
   "Basic Products I": ["Pasta Penne", "Water Bottle", "Honey Cereals", "Rice", "Salt", "Sugar"],
@@ -204,5 +271,6 @@
   </script>
 </body>
 </html>
+
 
 
