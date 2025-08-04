@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+<title>Supermarket Together Profit Calculator</title>
+  <style>
+    body { font-family: Arial; padding: 30px; background: #f4f4f4; }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+    input {
+      width: 80px;
+      padding: 4px;
+      font-size: 14px;
+    }
+    tbody {
+      display: block;
+      height: 600px;
+      overflow-y: auto;
+    }
+    thead, tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+    .category-row {
+      background-color: #e1f5fe;
+      font-weight: bold;
+      text-align: left;
+      padding-left: 10px;
+    }
+    .product-name {
+      text-align: left;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Supermarket Together Profit Calculator</h2>
+<p>Products are grouped by category. Enter cost and profit rate to calculate automatically.</p>
+    <table>
+     <thead>
+  <tr>
+    <th>Product</th>
+    <th>Cost ($)</th>
+    <th>Profit (%)</th>
+    <th>Sale Price ($)</th>
+    <th>Profit ($)</th>
+  </tr>
+</thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+   const productGroups = {
+  "Basic Products I": ["Pasta Penne", "Water Bottle", "Honey Cereals", "Rice", "Salt", "Sugar"],
+  "Basic Products II": ["Margarine", "Flour", "Apple Juice", "Olive Oil", "Ketchup", "Sliced Bread", "Pepper"],
+  "Basic Products III": ["Orange Juice", "Barbaque Sauce", "Mustard Sauce", "Spaghetti Box", "Tuna Pate", "Fiber Cereals", "Supreme Flour"],
+  "Basic Products IV": ["Black Coffee", "Egg Box", "Houmous", "White Flour", "Cane Sugar Box", "Sugar"],
+  "Basic Products V": ["Macarroni", "Ecologic Sugar", "Brown Sugar", "Olive Oil", "Mash Potatoes", "Potatoe Bag", "Espresso Coffee", "Basmati Rice", "Long Grain Rice"],
+  "Basic Products VI": ["Coffee", "Supreme Pasta", "Chocolate Cereals", "Premium Water", "Spring Water", "Powdered Sugar", "Sugar - Big Box", "Brown Sugar - Big Box"],
+  "Dairy Products I": ["Emmental Cheese", "Gruyere Cheese", "Skimmed Cheese", "Fruit Yoghurt", "Vanilla Yoghurt", "Milk Brick"],
+  "Dairy Products II": ["Butter", "Parmigiano Cheese", "Reggiano Cheese", "Mozzarella Cheese", "Skimmed Yoghurt"],
+  "Soda Drinks I": ["Cola Pack", "Soda Pack", "Decaf Soda Pack", "Soda Bottle", "Cola Bottle", "Sugar Free Soda Bottle", "Premium Soda"],
+  "Soda Drinks II": ["Orange Soda", "Pineapple Soda", "Tropical Soda", "Green Tea", "Red Tea", "Lemon Tea", "Cold Brew Coffee"],
+  "Soda Drinks III": ["Blueberry Energy Drink", "Guava Energy Drink", "Lima Energy Drink", "Fruit Punch Energy Drink", "Mango Energy Drink", "Cola Energy Drink", "Sugar Free Energy Drink"],
+  "Frozen Foods I": ["Pizza Barbaque", "Fondue", "Crocanti Ham", "Ham Cheese Crepe", "French Fries", "Crispy Potatoe Pos", "Green Beans"],
+  "Frozen Foods II": ["Four Cheese Pizza", "Four Seasons Pizza", "Vegetable Mix", "Chicken Mix", "Bolognaise Lasagna", "Vegetable Lasagna"],
+  "Hygiene I": ["Toothpaste", "Toilet Paper", "Hand Soap", "Avocado Shampoo", "Egg Shampoo", "Bath Gel"],
+  "Hygiene II": ["Toilet Paper", "Mango Soap", "Extra Soft Shampoo", "Jojoba Honey Shampoo", "Argan Oil Shampoo"],
+  "Hygiene III": ["Compact Toilet Paper", "Double Side Toilet Paper", "Lemon Soap", "Premium Bath Gel", "Shampoo For Babies"],
+  "Cleaning Products I": ["Detergent", "Stain Remover", "Glass Cleaner", "Detergent Tables", "Dishwasher", "Bleach", "Bleach - Big Bottle"],
+  "Cleaning Products II": ["Softener", "Premium Detergent", "Insecticide", "Cleaning Cloths", "Premium Capsules", "Premium Bleach", "Ammonia"],
+  "Sweets and Snacks I": ["Cookie Jar", "Maxi Cone", "Chocolate Spread", "Chocolate Powder", "Chips", "Sweet Bonbek"],
+  "Sweets and Snacks II": ["Peach Jam", "Ice Cream Box", "Chocolate Box", "Chocolate Biscuit", "Vanilate Biscuit", "Madeleine"],
+  "Sweets and Snacks III": ["Strawberry Jam", "Peanut Butter", "Chipos", "Marshmallow", "Lemon Biscuit", "Hazelnut Biscuit"],
+  "Sweets and Snacks IV": ["Premium Ice Cream", "Honey", "Premium Chocolate Box", "Foditos", "Premium Cake"],
+  "Sweets and Snacks V": ["Basic Strawberry Ice Cream", "Lemon Ice Cream", "Coffee Ice Cream", "Stracciatella Ice Cream", "Strawberry Meringue Ice Cream", "Caramel Ice Cream"],
+  "Sweets and Snacks VI": ["Premium Strawberry Ice Cream", "Strawberry Cheesecake Ice Cream", "Premium Caramel Ice Cream", "Pink Strawberry Ice Cream", "Alcoholic Ice Cream"],
+  "Meat I": ["Chopped Beef", "Pure Beef", "Veal", "Chicken Wings", "Chicken", "Parma Ham", "Sliced Ham"],
+  "Preserves I": ["Peas - Big", "Tuna - Big", "Red Beans", "Cat Food", "Cat Food", "Dog Food"],
+  "Preserves II": ["Chickpeas", "Meatballs", "Lentils", "Tomato Soup", "Canned Corn", "Canned Peas"],
+  "Infusions I": ["Green Tea", "Lemon Tea", "Black Tea", "Peppermint", "Mint", "Valerian"],
+  "Seafood I": ["Big Sushi", "Small Sushi", "Smoked Salmon", "Crab Sticks"],
+  "Books Pack I": ["Book - Electromagnetic", "Book - Surprise", "Book - ABC", "Book - Mother and Child", "Book - Colors", "Book - Piticha"],
+  "Books Pack II": ["Book - OnceUpon", "Book - Krok", "Book - Adventures", "Book - Donnine", "Book - Vintage", "Book - I Wont Share"],
+  "Alcoholic Drinks I": ["Beer Pack", "Beer Pack", "Beer Pack", "Beer Barrel", "Beer Barrel"],
+  "Alcoholic Drinks II": ["Vodka", "Red Wine", "Rose Wine", "White Wine", "Beer Barrel"],
+  "Alcoholic Drinks III": ["Premium Vodka", "Japanese Whisky", "Premium Whisky", "Premium Whisky"],
+  "Pharmacy I": ["Hydrogen Peroxide", "Disinfectant", "Ibuprofen", "Paracetamol", "Bandaids", "Laxative", "Antihistamine"],
+  "Pharmacy II": ["Zinc Supplement", "Antioxidant", "Fish Oil", "Algae Pills", "Vitamins", "Melatonin", "Sunscreen", "Stretch Cream"],
+  "Child Care I": ["Baby Food: Vegetables", "Baby Food: Fish", "Baby Food: Fruits", "Baby Food: Meat", "Nutritive Milk Mix", "Nutritive Milk Powder"],
+  "Child Care II": ["Ecologic Diapers", "Basic Diapers", "Toddler Diapers", "Premium Diapers", "Aloe Baby Wipes", "Basic Baby Wipes", "Baby Powder"],
+  "Produce I": ["Red Apple Tray", "Green Apple Tray", "Clementine Tray", "Orange Tray", "Pear Tray", "Lemon Tray"],
+  "Produce II": ["Mango Tray", "Avocado Tray", "Kiki Tray", "Papaya Tray", "Strawberry Tray", "Cherry Tray"],
+  "Produce III": ["Artichoke Tray", "Zucchini Tray", "Carrot Tray", "Tomato Tray", "Potato Tray", "Onion Tray"],
+  "Produce IV": ["Banana Pack", "Melon", "Pineapple", "Pumpkin", "Watermelon"]
+};
+
+
+    const tableBody = document.getElementById("tableBody");
+
+    let globalIndex = 0;
+
+    for (const category in productGroups) {
+      const categoryRow = document.createElement("tr");
+      categoryRow.className = "category-row";
+      categoryRow.innerHTML = `<td colspan="5">${category}</td>`;
+      tableBody.appendChild(categoryRow);
+
+      productGroups[category].forEach(product => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="product-name">${product}</td>
+          <td><input type="number" id="cost-${globalIndex}" oninput="calculate(${globalIndex})" placeholder="0.00"></td>
+          <td><input type="number" id="rate-${globalIndex}" oninput="calculate(${globalIndex})" placeholder="30"></td>
+          <td id="sale-${globalIndex}">$0.00</td>
+          <td id="profit-${globalIndex}">$0.00</td>
+        `;
+        tableBody.appendChild(row);
+        globalIndex++;
+      });
+    }
+
+    function calculate(index) {
+      const cost = parseFloat(document.getElementById(`cost-${index}`).value);
+      const rate = parseFloat(document.getElementById(`rate-${index}`).value);
+      const saleCell = document.getElementById(`sale-${index}`);
+      const profitCell = document.getElementById(`profit-${index}`);
+
+      if (!isNaN(cost) && !isNaN(rate)) {
+        const profit = cost * (rate / 100);
+        const sale = cost + profit;
+        saleCell.textContent = `$${sale.toFixed(2)}`;
+        profitCell.textContent = `$${profit.toFixed(2)}`;
+      } else {
+        saleCell.textContent = `$0.00`;
+        profitCell.textContent = `$0.00`;
+      }
+    }
+  </script>
+</body>
+</html>
