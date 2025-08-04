@@ -462,10 +462,10 @@ const productGroups = {
 ]
 };
 
-  const tableBody = document.getElementById("tableBody");
-  let globalIndex = 0;
+const tableBody = document.getElementById("tableBody");
+let globalIndex = 0;
 
-  function createTable() {
+function createTable() {
   tableBody.innerHTML = "";
   globalIndex = 0;
 
@@ -483,104 +483,127 @@ const productGroups = {
       const profitId = `profit-${globalIndex}`;
 
       row.innerHTML = `
-  <td><img src="ProductImages/${product.image}" alt="${product.name}" style="width:150px; height:auto;"></td>
-  <td class="product-name">${product.name}</td>
-  <td><input type="number" id="${costId}" value="${product.cost}" oninput="calculate(${globalIndex}); saveInputsToLocalStorage(${globalIndex})" class="form-control form-control-sm" min="0" step="0.01"></td>
-  <td><input type="number" id="${rateId}" oninput="calculate(${globalIndex}); saveInputsToLocalStorage(${globalIndex})" class="form-control form-control-sm" placeholder="30" min="0" step="0.1"></td>
-  <td id="${saleId}">$0.00</td>
-  <td id="${profitId}">$0.00</td>
-`;
+        <td class="product-name">${product.name}</td>
+        <td><input type="number" id="${costId}" value="${product.cost}" oninput="calculate(${globalIndex})" class="form-control form-control-sm" min="0" step="0.01"></td>
+        <td><input type="number" id="${rateId}" oninput="calculate(${globalIndex})" class="form-control form-control-sm" placeholder="30" min="0" step="0.1"></td>
+        <td id="${saleId}">$0.00</td>
+        <td id="${profitId}">$0.00</td>
+      `;
       tableBody.appendChild(row);
-      calculate(globalIndex); // ilk değerleri hesapla
       globalIndex++;
     });
   }
+
+  loadFromLocalStorage();
+  for (let i = 0; i < globalIndex; i++) calculate(i);
 }
 
-  function calculate(index) {
-    const cost = parseFloat(document.getElementById(`cost-${index}`).value);
-    const rate = parseFloat(document.getElementById(`rate-${index}`).value);
-    const saleCell = document.getElementById(`sale-${index}`);
-    const profitCell = document.getElementById(`profit-${index}`);
+function calculate(index) {
+  const costInput = document.getElementById(`cost-${index}`);
+  const rateInput = document.getElementById(`rate-${index}`);
+  const saleCell = document.getElementById(`sale-${index}`);
+  const profitCell = document.getElementById(`profit-${index}`);
 
-    if (!isNaN(cost) && !isNaN(rate)) {
-      const profit = cost * (rate / 100);
-      const sale = cost + profit;
-      saleCell.textContent = `$${sale.toFixed(2)}`;
-      profitCell.textContent = `$${profit.toFixed(2)}`;
-    } else {
-      saleCell.textContent = `$0.00`;
-      profitCell.textContent = `$0.00`;
-    }
+  const cost = parseFloat(costInput.value);
+  const rate = parseFloat(rateInput.value);
+
+  if (!isNaN(cost) && !isNaN(rate)) {
+    const profit = cost * (rate / 100);
+    const sale = cost + profit;
+    saleCell.textContent = `$${sale.toFixed(2)}`;
+    profitCell.textContent = `$${profit.toFixed(2)}`;
+  } else {
+    saleCell.textContent = `$0.00`;
+    profitCell.textContent = `$0.00`;
   }
 
-  document.getElementById('searchInput').addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll('#tableBody tr');
+  saveToLocalStorage(index, costInput.value, rateInput.value);
+}
 
-    let currentCategoryRow = null;
-    let categoryHasVisible = false;
+function saveToLocalStorage(index, cost, rate) {
+  const saved = JSON.parse(localStorage.getItem("productData") || "{}");
+  saved[index] = { cost, rate };
+  localStorage.setItem("productData", JSON.stringify(saved));
+}
 
-    rows.forEach(row => {
-      if (row.classList.contains('category-row')) {
-        if (currentCategoryRow && !categoryHasVisible) {
-          currentCategoryRow.style.display = 'none';
-        }
-        currentCategoryRow = row;
-        categoryHasVisible = false;
-        row.style.display = '';
-      } else {
-        const productName = row.querySelector('.product-name').textContent.toLowerCase();
-        if (productName.includes(filter)) {
-          row.style.display = '';
-          categoryHasVisible = true;
-        } else {
-          row.style.display = 'none';
-        }
+function loadFromLocalStorage() {
+  const saved = JSON.parse(localStorage.getItem("productData") || "{}");
+
+  for (let i = 0; i < globalIndex; i++) {
+    const costInput = document.getElementById(`cost-${i}`);
+    const rateInput = document.getElementById(`rate-${i}`);
+
+    if (saved[i]) {
+      if (costInput) costInput.value = saved[i].cost;
+      if (rateInput) rateInput.value = saved[i].rate;
+    }
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', function () {
+  const filter = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#tableBody tr');
+
+  let currentCategoryRow = null;
+  let categoryHasVisible = false;
+
+  rows.forEach(row => {
+    if (row.classList.contains('category-row')) {
+      if (currentCategoryRow && !categoryHasVisible) {
+        currentCategoryRow.style.display = 'none';
       }
-    });
-
-    if (currentCategoryRow && !categoryHasVisible) {
-      currentCategoryRow.style.display = 'none';
+      currentCategoryRow = row;
+      categoryHasVisible = false;
+      row.style.display = '';
+    } else {
+      const productName = row.querySelector('.product-name').textContent.toLowerCase();
+      if (productName.includes(filter)) {
+        row.style.display = '';
+        categoryHasVisible = true;
+      } else {
+        row.style.display = 'none';
+      }
     }
   });
 
-  document.getElementById('exportExcel').addEventListener('click', function () {
-    const wb = XLSX.utils.book_new();
-    const ws_data = [];
+  if (currentCategoryRow && !categoryHasVisible) {
+    currentCategoryRow.style.display = 'none';
+  }
+});
 
-    ws_data.push(["Product", "Cost ($)", "Profit (%)", "Sale Price ($)", "Profit ($)"]);
+document.getElementById('exportExcel').addEventListener('click', function () {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
 
-    const rows = document.querySelectorAll('#tableBody tr');
+  ws_data.push(["Product", "Cost ($)", "Profit (%)", "Sale Price ($)", "Profit ($)"]);
 
-    rows.forEach(row => {
-      if (row.style.display === 'none') return;
-      if (row.classList.contains('category-row')) {
-        ws_data.push([row.cells[0].innerText]);
-        return;
+  const rows = document.querySelectorAll('#tableBody tr');
+
+  rows.forEach(row => {
+    if (row.style.display === 'none') return;
+    if (row.classList.contains('category-row')) {
+      ws_data.push([row.cells[0].innerText]);
+      return;
+    }
+
+    const cells = row.querySelectorAll('td');
+    const rowData = [];
+    cells.forEach(cell => {
+      const input = cell.querySelector('input');
+      if (input) {
+        rowData.push(input.value || '');
+      } else {
+        rowData.push(cell.innerText);
       }
-
-      const cells = row.querySelectorAll('td');
-      const rowData = [];
-      cells.forEach(cell => {
-        const input = cell.querySelector('input');
-        if (input) {
-          rowData.push(input.value || '');
-        } else {
-          rowData.push(cell.innerText);
-        }
-      });
-      ws_data.push(rowData);
     });
-
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    XLSX.utils.book_append_sheet(wb, ws, "Products");
-    XLSX.writeFile(wb, "SupermarketTogether_ProfitCalculator.xlsx");
+    ws_data.push(rowData);
   });
 
-  createTable();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, "Products");
+  XLSX.writeFile(wb, "SupermarketTogether_ProfitCalculator.xlsx");
+});
 
-  // Tüm profit inputlarını seçip verilen oranla doldurur ve hesaplar
 function setAllProfitRates(rate) {
   for (let i = 0; i < globalIndex; i++) {
     const rateInput = document.getElementById(`rate-${i}`);
@@ -591,7 +614,6 @@ function setAllProfitRates(rate) {
   }
 }
 
-// Butonlara tıklama olayını ekle
 document.querySelectorAll('.set-profit-btn').forEach(button => {
   button.addEventListener('click', () => {
     const rate = parseFloat(button.getAttribute('data-rate'));
@@ -608,44 +630,9 @@ document.getElementById('customProfitBtn').addEventListener('click', () => {
   }
   setAllProfitRates(rate);
 });
-   function saveInputsToLocalStorage(index) {
-    const costInput = document.getElementById(`cost-${index}`);
-    const rateInput = document.getElementById(`rate-${index}`);
-    const savedData = JSON.parse(localStorage.getItem("productInputs") || "{}");
 
-    savedData[`cost-${index}`] = costInput.value;
-    savedData[`rate-${index}`] = rateInput.value;
+createTable();
+</script>
 
-    localStorage.setItem("productInputs", JSON.stringify(savedData));
-  }
-
-  function loadInputsFromLocalStorage() {
-    const savedData = JSON.parse(localStorage.getItem("productInputs") || "{}");
-
-    for (let i = 0; i < globalIndex; i++) {
-      const costInput = document.getElementById(`cost-${i}`);
-      const rateInput = document.getElementById(`rate-${i}`);
-
-      if (savedData[`cost-${i}`] !== undefined) {
-        costInput.value = savedData[`cost-${i}`];
-      }
-
-      if (savedData[`rate-${i}`] !== undefined) {
-        rateInput.value = savedData[`rate-${i}`];
-      }
-
-      calculate(i); // yeniden hesapla
-    }
-  }
-  loadInputsFromLocalStorage();
-
- </script>
-  
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
-
