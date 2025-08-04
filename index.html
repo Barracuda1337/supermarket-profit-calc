@@ -48,6 +48,25 @@
       width: 100%;
       min-width: 80px;
     }
+    .steam-btn {
+  position: fixed;
+  bottom: 70px; /* GitHub butonunun biraz üstünde */
+  right: 20px;
+  background-color: #1b2838;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+  z-index: 9999;
+}
+.steam-btn:hover {
+  background-color: #171a21;
+  color: #67c1f5;
+}
   </style>
 </head>
 <body>
@@ -55,7 +74,9 @@
 <a href="https://github.com/Barracuda1337/supermarket-profit-calc" target="_blank" rel="noopener" class="github-star-btn" title="Star us on GitHub!">
   ⭐ Star on GitHub
 </a>
-
+<a href="https://store.steampowered.com/app/2709570/Supermarket_Together/?utm_source=profitcalc" target="_blank" rel="noopener" class="steam-btn" title="View on Steam">
+  🛒 Play on Steam
+</a>
 <div class="container bg-white rounded shadow-sm p-4">
 
   <h2 class="mb-3">Supermarket Together Profit Calculator</h2>
@@ -245,3 +266,4 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
